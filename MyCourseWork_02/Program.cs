@@ -11,7 +11,7 @@ namespace MyCourseWork_02
             var path = Console.ReadLine();
             var file = System.IO.File.ReadAllText(path);
 
-            Console.WriteLine();
+            var htmlTree = new HtmlTreeBuilder(file).BuildHtmlTree();
         }
     }
 }
