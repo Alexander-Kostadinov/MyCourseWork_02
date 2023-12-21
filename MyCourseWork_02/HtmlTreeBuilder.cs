@@ -5,12 +5,15 @@ namespace MyCourseWork_02
     public class HtmlTreeBuilder
     {
         private string _html;
+        public HtmlElement Root;
         private LinkedList<HtmlElement> _elements;
 
         public HtmlTreeBuilder(string html)
         {
             _html = html;
             _elements = new LinkedList<HtmlElement>();
+
+            BuildHtmlTree();
         }
 
         private char ToLowerLetter(char ch)
@@ -46,7 +49,7 @@ namespace MyCourseWork_02
             return true;
         }
 
-        public HtmlElement BuildHtmlTree()
+        private void BuildHtmlTree()
         {
             var tag = "";
             var content = "";
@@ -105,7 +108,7 @@ namespace MyCourseWork_02
 
             if (_elements.Count != 1)
                 throw new Exception("Something's wrong! The operation failed!");
-            return _elements.First.Value;
+            Root = _elements.First.Value;
         }
     }
 }

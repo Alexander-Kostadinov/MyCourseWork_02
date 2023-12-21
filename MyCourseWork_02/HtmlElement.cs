@@ -69,7 +69,7 @@ namespace MyCourseWork_02
                     quotsCount++;
                     attribute += tag[i];
 
-                    if (quotsCount % 2 == 0 && quotsCount > 0)
+                    if (quotsCount % 2 == 0)
                     {
                         ValidateAttribute(attribute);
                         Attributes.Add(attribute);
@@ -90,6 +90,17 @@ namespace MyCourseWork_02
                 ValidateAttribute(attribute);
                 Attributes.Add(attribute);
             }
+        }
+
+        private bool Contains(string value, char ch)
+        {
+            if (value == null || value == string.Empty)
+                return false;
+
+            for (int i = 0; i < value.Length; i++)
+                if (value[i] == ch) return true;
+
+            return false;
         }
 
         private void ValidateAttribute(string attribute)
@@ -127,7 +138,7 @@ namespace MyCourseWork_02
             if (attributeValue != "")
             {
                 if ((attributeValue[0] != '"' && attributeValue[0] != '\'') ||
-                attributeValue[0] != attributeValue[attributeValue.Length - 1])
+                (attributeValue[0] != attributeValue[attributeValue.Length - 1]) || Contains(attributeValue, '<'))
                     throw new Exception("Error detected! Invalid attribute value!");
             }
         }
