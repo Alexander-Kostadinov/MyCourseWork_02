@@ -71,6 +71,7 @@ namespace MyCourseWork_02
 
                                 if (parent != null)
                                 {
+                                    child.Parent = parent;
                                     parent.Children.Add(child);
                                     _elements.RemoveAt(_elements.Last.Index);
                                 }
@@ -85,6 +86,7 @@ namespace MyCourseWork_02
 
                             if (!IsVoidHtmlTag(element.TagName))
                                 throw new Exception("Incorrect closed tag!");
+                            element.Parent = _elements.Last.Value;
                             _elements.Last.Value.Children.Add(element);
                         }
                         else _elements.Add(new HtmlElement(tag, content));

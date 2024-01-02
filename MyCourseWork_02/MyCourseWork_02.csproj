@@ -43,7 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandExecuter.cs" />
     <Compile Include="HtmlElement.cs" />
+    <Compile Include="PathFinder.cs" />
+    <Compile Include="Tag.cs" />
     <Compile Include="HtmlTreeBuilder.cs" />
     <Compile Include="LinkedList.cs" />
     <Compile Include="Node.cs" />

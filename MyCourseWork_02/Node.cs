@@ -1,4 +1,5 @@
-﻿namespace MyCourseWork_02
+﻿
+namespace MyCourseWork_02
 {
     public class Node<T>
     {

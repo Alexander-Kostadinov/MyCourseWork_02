@@ -6,6 +6,7 @@ namespace MyCourseWork_02
     {
         public string TagName;
         public string Content;
+        public HtmlElement Parent;
         public LinkedList<string> Attributes;
         public LinkedList<HtmlElement> Children;
 
