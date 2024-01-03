@@ -8,24 +8,25 @@ namespace MyCourseWork_02
         {
             Console.WriteLine("Enter path of the file:");
 
-            HtmlElement root = null;
-
             try
             {
+                HtmlElement html = null;
                 var path = Console.ReadLine();
                 var file = System.IO.File.ReadAllText(path);
                 var htmlTree = new HtmlTreeBuilder(file);
-                root = htmlTree.Root;
+                html = htmlTree.Root;
 
                 while (true)
                 {
                     var newCommand = Console.ReadLine();
+                    Console.WriteLine();
 
                     if (newCommand == "")
                         break;
 
-                    Command command = new Command(newCommand, root);
+                    Command command = new Command(newCommand, html);
                     command.Execute();
+                    Console.WriteLine();
                 }
             }
             catch (Exception e)

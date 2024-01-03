@@ -4,13 +4,13 @@ namespace MyCourseWork_02
 {
     public class PathFinder
     {
-        private LinkedList<Tag> _tags;
-        public LinkedList<HtmlElement> Elements;
+        private LinkedList<Tag> _pathTags;
+        public LinkedList<HtmlElement> ElementsFound;
 
         public PathFinder(string path, HtmlElement element) 
         {
-            _tags = new LinkedList<Tag>();
-            Elements = new LinkedList<HtmlElement>();
+            _pathTags = new LinkedList<Tag>();
+            ElementsFound = new LinkedList<HtmlElement>();
 
             GetTagsFromPath(path);
             FindPathElements(element, 0);
@@ -71,7 +71,7 @@ namespace MyCourseWork_02
             {
                 var root = new Tag();
                 root.Name = "html";
-                _tags.Add(root);
+                _pathTags.Add(root);
                 return;
             }
 
@@ -83,7 +83,7 @@ namespace MyCourseWork_02
                 {
                     if (tag != "")
                     {
-                        _tags.Add(GetTagElements(tag));
+                        _pathTags.Add(GetTagElements(tag));
                         tag = "";
                     }
                     continue;
@@ -93,7 +93,7 @@ namespace MyCourseWork_02
 
             if (tag != "")
             {
-                _tags.Add(GetTagElements(tag));
+                _pathTags.Add(GetTagElements(tag));
             }
         }
 
@@ -101,9 +101,9 @@ namespace MyCourseWork_02
         {
             if (element == null) return false;
 
-            var tag = _tags.Last;
+            var tag = _pathTags.Last;
 
-            for (int i = 0; i < _tags.Count; i++)
+            for (int i = 0; i < _pathTags.Count; i++)
             {
                 if (element.TagName != tag.Value.Name)
                     return false;
@@ -117,30 +117,41 @@ namespace MyCourseWork_02
 
         private void FindPathElements(HtmlElement element, int level)
         {
-            if (element == null || _tags.Count == 0) return;
+            if (element == null || _pathTags.Count == 0) return;
 
-            if (element.TagName == _tags.Last.Value.Name)
+            if (_pathTags.Last.Value.Name == "*" && _pathTags.Last.Previous != null)
+            {
+                if (element.TagName == _pathTags.Last.Previous.Value.Name)
+                {
+                    _pathTags.RemoveAt(_pathTags.Count - 1);
+
+                    if (IsCorrectPath(element))
+                        FindTagElements(element, _pathTags.Last.Value.Name);
+
+                    var tag = new Tag();
+                    tag.Name = "*";
+                    _pathTags.Add(tag);
+                }
+            }
+            else if (element.TagName == _pathTags.Last.Value.Name)
             {
                 if (IsCorrectPath(element))
-                {
-                    Elements.Add(element);
-                }
+                    ElementsFound.Add(element);
             }
 
             if (element.Children.Count > 0)
             {
                 level++;
-                var tag = _tags.First;
+                var tag = _pathTags.First;
                 var child = element.Children.First;
 
-
-                for (int j = 0; j < _tags.Count; j++)
+                for (int j = 0; j < _pathTags.Count; j++)
                 {
                     if (tag.Index == level) break;
                     tag = tag.Next;
                 }
 
-                if (level > _tags.Count || tag == null) return;
+                if (level > _pathTags.Count || tag == null) return;
 
                 for (int i = 0; i < element.Children.Count; i++)
                 {
@@ -159,6 +170,34 @@ namespace MyCourseWork_02
                     FindPathElements(child.Value, level);
                     child = child.Next;
                 }
+            }
+        }
+
+        private void FindTagElements(HtmlElement element, string tag)
+        {
+            if (element == null || tag == null) return;
+
+            if (element.Children.Count > 0)
+            {
+                var child = element.Children.First;
+
+                for (int i = 0; i < element.Children.Count; i++)
+                {
+                    if (child.Value.TagName == tag)
+                    {
+                        FindTagElements(child.Value, tag);
+                    }
+                    else
+                    {
+                        ElementsFound.Add(child.Value);
+                    }
+
+                    child = child.Next;
+                }
+            }
+            else
+            {
+                ElementsFound.Add(element);
             }
         }
 

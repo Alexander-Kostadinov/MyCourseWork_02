@@ -18,7 +18,7 @@ namespace MyCourseWork_02
         public void Execute()
         {
             var pathFinder = new PathFinder(_path, _element);
-            var commandExecuter = new CommandExecuter(pathFinder.Elements);
+            var commandExecuter = new CommandExecuter(pathFinder.ElementsFound);
 
             switch (_name)
             {

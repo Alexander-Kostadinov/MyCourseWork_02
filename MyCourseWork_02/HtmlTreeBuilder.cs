@@ -86,6 +86,7 @@ namespace MyCourseWork_02
 
                             if (!IsVoidHtmlTag(element.TagName))
                                 throw new Exception("Incorrect closed tag!");
+                            element.IsVoid = true;
                             element.Parent = _elements.Last.Value;
                             _elements.Last.Value.Children.Add(element);
                         }

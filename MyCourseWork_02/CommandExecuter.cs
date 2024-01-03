@@ -9,7 +9,7 @@ namespace MyCourseWork_02
         public CommandExecuter(LinkedList<HtmlElement> elements)
         {
             if (elements == null) 
-                throw new Exception("No elements were found!");
+                throw new Exception("No matched elements!");
 
             _elements = elements;
         }
@@ -25,28 +25,44 @@ namespace MyCourseWork_02
             }
         }
 
+        private string PrintAttributes(HtmlElement element)
+        {
+            if (element == null) return null;
+
+            var result = string.Empty;
+            var attribute = element.Attributes.First;
+
+            for (int i = 0; i < element.Attributes.Count; i++)
+            {
+                result += ' ' + attribute.Value;
+                attribute = attribute.Next;
+            }
+
+            return result;
+        }
+
         private void PrintHtmlElement(HtmlElement element, int spaceCount)
         {
             if (element == null) return;
 
-            var attributes = "";
-            var attribute = element.Attributes.First;
-
-            if (element.Attributes.Count > 0)
+            if (element.Children.Count == 0)
             {
-                for (int i = 0; i < element.Attributes.Count; i++)
+                if (element.IsVoid)
                 {
-                    attributes += attribute.Value;
-
-                    attribute = attribute.Next;
+                    Console.WriteLine(new string(' ', spaceCount) + '<' + 
+                        element.TagName + ' ' + PrintAttributes(element) + "/>");
+                }
+                else
+                {
+                    Console.WriteLine(new string(' ', spaceCount) + '<' + element.TagName + 
+                        PrintAttributes(element) + '>' + element.Content + "</" + element.TagName + '>');
                 }
             }
-
-            Console.WriteLine(new string(' ', spaceCount) +
-                element.TagName + ' ' + attributes + ' ' + element.Content);
-
-            if (element.Children.Count > 0)
+            else if (element.Children.Count > 0)
             {
+                Console.WriteLine(new string(' ', spaceCount) + '<' + element.TagName +
+                    PrintAttributes(element) + '>' + element.Content);
+
                 spaceCount++;
                 var child = element.Children.First;
 
@@ -55,6 +71,9 @@ namespace MyCourseWork_02
                     PrintHtmlElement(child.Value, spaceCount);
                     child = child.Next;
                 }
+
+                spaceCount--;
+                Console.WriteLine(new string(' ', spaceCount) + "</" + element.TagName + '>');
             }
         }
     }

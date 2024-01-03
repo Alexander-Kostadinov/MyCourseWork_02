@@ -4,6 +4,7 @@ namespace MyCourseWork_02
 {
     public class HtmlElement
     {
+        public bool IsVoid;
         public string TagName;
         public string Content;
         public HtmlElement Parent;
