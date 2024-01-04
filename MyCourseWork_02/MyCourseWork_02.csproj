@@ -47,7 +47,7 @@
     <Compile Include="CommandExecuter.cs" />
     <Compile Include="HtmlElement.cs" />
     <Compile Include="PathFinder.cs" />
-    <Compile Include="Tag.cs" />
+    <Compile Include="PathTag.cs" />
     <Compile Include="HtmlTreeBuilder.cs" />
     <Compile Include="LinkedList.cs" />
     <Compile Include="Node.cs" />

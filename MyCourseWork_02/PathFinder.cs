@@ -4,24 +4,62 @@ namespace MyCourseWork_02
 {
     public class PathFinder
     {
-        private LinkedList<Tag> _pathTags;
+        private LinkedList<PathTag> _pathTags;
         public LinkedList<HtmlElement> ElementsFound;
 
         public PathFinder(string path, HtmlElement element) 
         {
-            _pathTags = new LinkedList<Tag>();
+            _pathTags = new LinkedList<PathTag>();
             ElementsFound = new LinkedList<HtmlElement>();
 
             GetTagsFromPath(path);
             FindPathElements(element, 0);
         }
 
-        private Tag GetTagElements(string tag)
+        private void GetTagsFromPath(string path)
+        {
+            if (path == null || path.Length < 2)
+                return;
+
+            else if (path[0] != '/' || path[1] != '/')
+                return;
+
+            else if (path == "//")
+            {
+                var root = new PathTag();
+                root.Name = "html";
+                _pathTags.Add(root);
+                return;
+            }
+
+            var tag = "";
+
+            for (int i = 0; i < path.Length; i++)
+            {
+                if (path[i] == '/')
+                {
+                    if (tag != "")
+                    {
+                        _pathTags.Add(GetTagElements(tag));
+                        tag = "";
+                    }
+                    continue;
+                }
+                tag += path[i];
+            }
+
+            if (tag != "")
+            {
+                _pathTags.Add(GetTagElements(tag));
+            }
+        }
+
+        private PathTag GetTagElements(string tag)
         {
             var index = "";
             var isIndex = false;
             var isAttribute = false;
-            Tag htmlTag = new Tag();
+            PathTag htmlTag = new PathTag();
 
             for (int i = 0; i < tag.Length - 1; i++)
             {
@@ -59,44 +97,6 @@ namespace MyCourseWork_02
             return htmlTag;
         }
 
-        private void GetTagsFromPath(string path)
-        {
-            if (path == null || path.Length < 2)
-                return;
-
-            else if (path[0] != '/' || path[1] != '/')
-                return;
-
-            else if (path == "//")
-            {
-                var root = new Tag();
-                root.Name = "html";
-                _pathTags.Add(root);
-                return;
-            }
-
-            var tag = "";
-
-            for (int i = 0; i < path.Length; i++)
-            {
-                if (path[i] == '/')
-                {
-                    if (tag != "")
-                    {
-                        _pathTags.Add(GetTagElements(tag));
-                        tag = "";
-                    }
-                    continue;
-                }
-                tag += path[i];
-            }
-
-            if (tag != "")
-            {
-                _pathTags.Add(GetTagElements(tag));
-            }
-        }
-
         private bool IsCorrectPath(HtmlElement element)
         {
             if (element == null) return false;
@@ -105,7 +105,9 @@ namespace MyCourseWork_02
 
             for (int i = 0; i < _pathTags.Count; i++)
             {
-                if (element.TagName != tag.Value.Name)
+                if (element == null || tag.Value == null)
+                    return false;
+                else if (element.TagName != tag.Value.Name)
                     return false;
 
                 tag = tag.Previous;
@@ -128,7 +130,7 @@ namespace MyCourseWork_02
                     if (IsCorrectPath(element))
                         FindTagElements(element, _pathTags.Last.Value.Name);
 
-                    var tag = new Tag();
+                    var tag = new PathTag();
                     tag.Name = "*";
                     _pathTags.Add(tag);
                 }

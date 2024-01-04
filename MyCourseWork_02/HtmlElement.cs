@@ -6,19 +6,33 @@ namespace MyCourseWork_02
     {
         public bool IsVoid;
         public string TagName;
-        public string Content;
+        private string _content;
         public HtmlElement Parent;
         public LinkedList<string> Attributes;
         public LinkedList<HtmlElement> Children;
 
-        public HtmlElement(string tag, string content)
+        public string Content 
         {
-            Content = content;
+            get => _content; 
+            set
+            {
+                if (IsEmpty(value))
+                {
+                    _content = null;
+                }
+                else
+                {
+                    _content = value;
+                }
+            }
+        }
+
+        public HtmlElement(string tag)
+        {
             Attributes = new LinkedList<string>();
             Children = new LinkedList<HtmlElement>();
 
             GetTagAttributes(tag);
-            CheckForEmptyContent();
         }
 
         private void ValidateTagName()
@@ -32,24 +46,23 @@ namespace MyCourseWork_02
                     (TagName[i] < 65 || TagName[i] > 90) &&
                     (TagName[i] < 97 || TagName[i] > 122))
                 {
-                    throw new Exception("Error was found! Not allowed characters in tag name!");
+                    throw new Exception("Not allowed characters in tag name!");
                 }
             }
         }
 
-        private void CheckForEmptyContent()
+        private bool IsEmpty(string text)
         {
-            if (Content != null)
+            if (text != null)
             {
-                for (int i = 0; i < Content.Length; i++)
+                for (int i = 0; i < text.Length; i++)
                 {
-                    if (Content[i] != '\r' && Content[i] != '\n' &&
-                        Content[i] != '\t' && Content[i] != ' ')
-                        return;
+                    if (text[i] != '\r' && text[i] != '\n' &&
+                        text[i] != '\t' && text[i] != ' ') return false;
                 }
             }
 
-            Content = null;
+            return true;
         }
 
         private void GetTagAttributes(string tag)

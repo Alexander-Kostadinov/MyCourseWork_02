@@ -26,6 +26,7 @@ namespace MyCourseWork_02
                     commandExecuter.Print();
                     break;
                 case "SET":
+                    commandExecuter.Set(_content);
                     break;
                 case "COPY":
                     break;
@@ -40,25 +41,40 @@ namespace MyCourseWork_02
         {
             if (command == null) return;
 
+            var length = 0;
             var counter = 0;
-            var index = 0;
-            var commandElements = new string[3];
 
             for (int i = 0; i < command.Length; i++)
             {
-                if (command[i] == ' ' || i == command.Length - 1)
+                if (command[i] == '"')
                 {
-                    if (i == command.Length - 1) i++;
+                    for (int j = i + 1; j < command.Length; j++)
+                    {
+                        if (command[j] == '"')
+                        {
+                            counter++;
 
-                    commandElements[counter] = command.Substring(index, i - index);
-                    index = i + 1;
-                    counter++;
+                            if (counter == 1)
+                            {
+                                _path = command.Substring(i + 1, length);
+                            }
+                            else
+                            {
+                                _content = command.Substring(i + 1, length);
+                            }
+
+                            length = 0;
+                            i = j;
+                            break;
+                        }
+                        length++;
+                    }
+                }
+                else if (counter == 0 && command[i] != ' ')
+                {
+                    _name += command[i];
                 }
             }
-
-            _name = commandElements[0];
-            _path = commandElements[1];
-            _content = commandElements[2];
         }
     }
 }

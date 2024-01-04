@@ -6,14 +6,16 @@ namespace MyCourseWork_02
     {
         private string _html;
         public HtmlElement Root;
-        private LinkedList<HtmlElement> _elements;
+        public LinkedList<HtmlElement> VoidElements;
+        private LinkedList<HtmlElement> _treeElements;
 
         public HtmlTreeBuilder(string html)
         {
             _html = html;
-            _elements = new LinkedList<HtmlElement>();
+            VoidElements = new LinkedList<HtmlElement>();
+            _treeElements = new LinkedList<HtmlElement>();
 
-            BuildHtmlTree();
+            BuildHtmlTreeStructure();
         }
 
         private char ToLowerLetter(char ch)
@@ -49,69 +51,95 @@ namespace MyCourseWork_02
             return true;
         }
 
-        private void BuildHtmlTree()
+        private void AppendVoidElement(string tag, int length)
         {
-            var tag = "";
-            var content = "";
+            if (tag == string.Empty) return;
+
+            if (tag[tag.Length - 1] == '/')
+            {
+                var element = new HtmlElement(tag.Substring(0, length - 1));
+
+                if (IsVoidHtmlTag(element.TagName) && _treeElements.Count > 0)
+                {
+                    element.IsVoid = true;
+                    _treeElements.Last.Value.Children.Add(element);
+                }
+                else if (IsVoidHtmlTag(element.TagName))
+                {
+                    VoidElements.Add(element);
+                }
+                else throw new Exception("Incorrect closed tag!");
+            }
+        }
+
+        private void AppendChild(Node<HtmlElement> child, string tag)
+        {
+            if (child == null || tag == string.Empty)
+                throw new Exception("Incorrect end tag of element!");
+
+            var parent = child.Previous;
+
+            if (Equals(child.Value.TagName, tag) && parent != null)
+            {
+                child.Value.Parent = parent.Value;
+                parent.Value.Children.Add(child.Value);
+                _treeElements.RemoveAt(_treeElements.Count - 1);
+
+            }
+
+            else if (Equals(child.Value.TagName, tag) && _treeElements.Count == 1)
+                return;
+
+            else throw new Exception("Incorrect end tag of element!");
+        }
+
+        public HtmlElement BuildHtmlTreeStructure()
+        {
             var quotsCount = 0;
+            var content = string.Empty;
+            HtmlElement element = null;
 
             for (int i = 0; i < _html.Length; i++)
             {
                 if (_html[i] == '<')
                 {
-                    if (tag != "")
+                    if (element != null)
                     {
-                        if (tag[0] == '/' && _elements.Count >= 1)
-                        {
-                            var child = _elements.Last.Value;
-
-                            if (Equals(_elements.Last.Value.TagName, tag.Substring(1)))
-                            {
-                                var parent = _elements.Last.Previous.Value;
-
-                                if (parent != null)
-                                {
-                                    child.Parent = parent;
-                                    parent.Children.Add(child);
-                                    _elements.RemoveAt(_elements.Last.Index);
-                                }
-                            }
-                            else throw new Exception("Incorrect closing tag!");
-                        }
-                        else if (tag[tag.Length - 1] == '/' && _elements.Last != null)
-                        {
-                            content = null;
-                            tag = tag.Substring(0, tag.Length - 1);
-                            var element = new HtmlElement(tag, content);
-
-                            if (!IsVoidHtmlTag(element.TagName))
-                                throw new Exception("Incorrect closed tag!");
-                            element.IsVoid = true;
-                            element.Parent = _elements.Last.Value;
-                            _elements.Last.Value.Children.Add(element);
-                        }
-                        else _elements.Add(new HtmlElement(tag, content));
-
-                        tag = content = "";
+                        element.Content = content;
+                        content = string.Empty;
                     }
+                    var length = 0;
+
                     for (int j = i + 1; j < _html.Length; j++)
                     {
                         if (_html[j] == '>' && quotsCount % 2 == 0)
                         {
-                            i = j;
+                            var tag = _html.Substring(i + 1, length); i = j;
+
+                            if (tag[0] == '/')
+                            {
+                                AppendChild(_treeElements.Last, tag.Substring(1));
+                                element = null;
+                            }
+                            else if (tag[tag.Length - 1] == '/')
+                            {
+                                AppendVoidElement(tag, length);
+                                element = null;
+                            }
+                            else
+                            {
+                                element = new HtmlElement(tag);
+                                _treeElements.Add(element);
+                            }
                             break;
                         }
-                        else if (_html[j] == '"' || _html[j] == '\'')
-                            quotsCount++;
-                        tag += _html[j];
+                        else if (_html[j] == '"' || _html[j] == '\'') quotsCount++;
+                        length++;
                     }
                 }
-                else if (tag != "") content += _html[i];
+                else if (element != null) content += _html[i];
             }
-
-            if (_elements.Count != 1)
-                throw new Exception("Something's wrong! The operation failed!");
-            Root = _elements.First.Value;
+            return Root = _treeElements.First.Value;
         }
     }
 }

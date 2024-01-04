@@ -2,7 +2,7 @@
 
 namespace MyCourseWork_02
 {
-    public class Tag
+    public class PathTag
     {
         public string Name;
         public int TagIndex;

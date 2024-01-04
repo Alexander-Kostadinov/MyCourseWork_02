@@ -8,20 +8,22 @@ namespace MyCourseWork_02
 
         public CommandExecuter(LinkedList<HtmlElement> elements)
         {
-            if (elements == null) 
-                throw new Exception("No matched elements!");
+            if (elements.Count == 0)
+            {
+                Console.WriteLine("No matches!");
+            }
 
             _elements = elements;
         }
 
         public void Print()
         {
-            var pathElement = _elements.First;
+            var element = _elements.First;
 
             for (int i = 0; i < _elements.Count; i++)
             {
-                PrintHtmlElement(pathElement.Value, 0);
-                pathElement = pathElement.Next;
+                PrintHtmlElement(element.Value, 0);
+                element = element.Next;
             }
         }
 
@@ -49,12 +51,12 @@ namespace MyCourseWork_02
             {
                 if (element.IsVoid)
                 {
-                    Console.WriteLine(new string(' ', spaceCount) + '<' + 
+                    Console.WriteLine(new string(' ', spaceCount) + '<' +
                         element.TagName + ' ' + PrintAttributes(element) + "/>");
                 }
                 else
                 {
-                    Console.WriteLine(new string(' ', spaceCount) + '<' + element.TagName + 
+                    Console.WriteLine(new string(' ', spaceCount) + '<' + element.TagName +
                         PrintAttributes(element) + '>' + element.Content + "</" + element.TagName + '>');
                 }
             }
@@ -75,6 +77,46 @@ namespace MyCourseWork_02
                 spaceCount--;
                 Console.WriteLine(new string(' ', spaceCount) + "</" + element.TagName + '>');
             }
+        }
+
+        public void Set(string content)
+        {
+            var element = _elements.First;
+
+            if (Contains(content, '<'))
+            {
+                var treeBuilder = new HtmlTreeBuilder(content);
+
+                for (int i = 0; i < _elements.Count; i++)
+                {
+                    if (treeBuilder.Root != null)
+                    {
+                        var child = treeBuilder.Root;
+                        child.Parent = element.Value;
+                        element.Value.Children.Add(child);
+                        element.Value.Content = string.Empty;
+                    }
+                    element = element.Next;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _elements.Count; i++)
+                {
+                    element.Value.Content = content;
+                    element = element.Next;
+                }
+            }
+        }
+
+        private bool Contains(string text, char ch)
+        {
+            if (text == null) return false;
+
+            for (int i = 0; i < text.Length; i++)
+                if (text[i] == ch) return true;
+
+            return false;
         }
     }
 }
