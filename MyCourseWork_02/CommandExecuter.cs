@@ -81,26 +81,43 @@ namespace MyCourseWork_02
 
         public void Set(string content)
         {
-            var element = _elements.First;
-
             if (Contains(content, '<'))
             {
                 var treeBuilder = new HtmlTreeBuilder(content);
 
-                for (int i = 0; i < _elements.Count; i++)
+                if (treeBuilder.VoidElements.Count > 0)
                 {
-                    if (treeBuilder.Root != null)
+                    var element = _elements.First;
+                    var voidElement = treeBuilder.VoidElements.First;
+
+                    for (int i = 0; i < _elements.Count; i++)
+                    {
+                        for (int j = 0; j < treeBuilder.VoidElements.Count; j++)
+                        {
+                            element.Value.Children.Add(voidElement.Value);
+                            voidElement = voidElement.Next;
+                        }
+                        element = element.Next;
+                    }
+                }
+                if (treeBuilder.Root != null)
+                {
+                    var element = _elements.First;
+
+                    for (int i = 0; i < _elements.Count; i++)
                     {
                         var child = treeBuilder.Root;
                         child.Parent = element.Value;
                         element.Value.Children.Add(child);
                         element.Value.Content = string.Empty;
+                        element = element.Next;
                     }
-                    element = element.Next;
                 }
             }
             else
             {
+                var element = _elements.First;
+
                 for (int i = 0; i < _elements.Count; i++)
                 {
                     element.Value.Content = content;

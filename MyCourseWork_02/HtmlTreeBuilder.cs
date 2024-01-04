@@ -66,6 +66,7 @@ namespace MyCourseWork_02
                 }
                 else if (IsVoidHtmlTag(element.TagName))
                 {
+                    element.IsVoid = true;
                     VoidElements.Add(element);
                 }
                 else throw new Exception("Incorrect closed tag!");
@@ -93,7 +94,7 @@ namespace MyCourseWork_02
             else throw new Exception("Incorrect end tag of element!");
         }
 
-        public HtmlElement BuildHtmlTreeStructure()
+        public void BuildHtmlTreeStructure()
         {
             var quotsCount = 0;
             var content = string.Empty;
@@ -137,9 +138,12 @@ namespace MyCourseWork_02
                         length++;
                     }
                 }
-                else if (element != null) content += _html[i];
+                else if (element != null) 
+                    content += _html[i];
             }
-            return Root = _treeElements.First.Value;
+
+            if (_treeElements.Count > 0) 
+                Root = _treeElements.First.Value;
         }
     }
 }
