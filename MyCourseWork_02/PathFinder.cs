@@ -117,10 +117,8 @@ namespace MyCourseWork_02
             return true;
         }
 
-        private void FindPathElements(HtmlElement element, int level)
+        private void CheckForSearchedElement(HtmlElement element)
         {
-            if (element == null || _pathTags.Count == 0) return;
-
             if (_pathTags.Last.Value.Name == "*" && _pathTags.Last.Previous != null)
             {
                 if (element.TagName == _pathTags.Last.Previous.Value.Name)
@@ -140,6 +138,13 @@ namespace MyCourseWork_02
                 if (IsCorrectPath(element))
                     ElementsFound.Add(element);
             }
+        }
+
+        private void FindPathElements(HtmlElement element, int level)
+        {
+            if (element == null || _pathTags.Count == 0) return;
+
+            CheckForSearchedElement(element);
 
             if (element.Children.Count > 0)
             {
