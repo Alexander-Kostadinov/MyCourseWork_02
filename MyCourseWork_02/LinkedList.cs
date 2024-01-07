@@ -8,6 +8,16 @@ namespace MyCourseWork_02
         public Node<T> Last;
         public int Count;
 
+        public void Clear()
+        {
+            var node = First;
+
+            while (Count > 0)
+            {
+                RemoveAt(node.Index);
+            }
+        }
+
         public void Add(T value)
         {
             var newNode = new Node<T>(value);
@@ -18,16 +28,16 @@ namespace MyCourseWork_02
             }
             else
             {
-                var last = First;
+                var node = First;
 
-                while (last.Next != null)
+                while (node.Next != null)
                 {
-                    last = last.Next;
+                    node = node.Next;
                 }
 
-                last.Next = newNode;
+                node.Next = newNode;
                 Last = newNode;
-                newNode.Previous = last;
+                newNode.Previous = node;
             }
 
             Count++;
@@ -41,28 +51,25 @@ namespace MyCourseWork_02
                 throw new ArgumentOutOfRangeException();
             }
 
-            Node<T> node = First;
+            Node<T> node = null;
 
             if (index == 0)
             {
-                First = node.Next;
-                First.Previous = null;
-                node = First;
-
-                while (node != null)
+                if (First != null)
                 {
-                    node.Index--;
-                    node = node.Next;
+                    First = First.Next;
+                    node = First;
                 }
             }
-            else if (index == Last.Index)
+            else if (index == Count - 1)
             {
-                node = Last;
-                Last = node.Previous;
+                Last = Last.Previous;
                 Last.Next = null;
             }
             else
             {
+                node = First;
+
                 while (node != null && node.Index != index)
                 {
                     node = node.Next;
@@ -71,12 +78,12 @@ namespace MyCourseWork_02
                 node.Previous.Next = node.Next;
                 node.Next.Previous = node.Previous;
                 node = node.Next;
+            }
 
-                while (node != null)
-                {
-                    node.Index--;
-                    node = node.Next;
-                }
+            while (node != null)
+            {
+                node.Index--;
+                node = node.Next;
             }
 
             Count--;

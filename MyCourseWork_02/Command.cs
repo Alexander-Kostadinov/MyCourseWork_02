@@ -17,18 +17,23 @@ namespace MyCourseWork_02
 
         public void Execute()
         {
-            var pathFinder = new PathFinder(_path, _element);
-            var commandExecuter = new CommandExecuter(pathFinder.ElementsFound);
+            var path = new PathFinder(_path, _element);
+            var executer = new CommandExecuter(path.ElementsFound);
 
             switch (_name)
             {
                 case "PRINT":
-                    commandExecuter.Print();
+                    executer.Print();
                     break;
                 case "SET":
-                    commandExecuter.Set(_content);
+                    executer.Set(_content);
                     break;
                 case "COPY":
+                    if (_path != _content)
+                    {
+                        var secondPath = new PathFinder(_content, _element);
+                        executer.Copy(secondPath.ElementsFound);
+                    }
                     break;
                 case "SAVE":
                     break;

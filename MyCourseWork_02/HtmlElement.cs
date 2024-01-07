@@ -37,8 +37,7 @@ namespace MyCourseWork_02
 
         private void ValidateTagName()
         {
-            if (TagName == null || TagName == "")
-                throw new Exception("Tag name cannot be empty!");
+            if (TagName == null || TagName == "") return;
 
             for (int i = 0; i < TagName.Length; i++)
             {

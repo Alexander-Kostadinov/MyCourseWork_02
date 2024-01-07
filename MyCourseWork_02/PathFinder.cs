@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace MyCourseWork_02
 {
     public class PathFinder
