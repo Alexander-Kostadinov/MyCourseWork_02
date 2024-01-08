@@ -5,13 +5,14 @@ namespace MyCourseWork_02
     public class HtmlTreeBuilder
     {
         private string _html;
-        public HtmlElement Root;
+        public LinkedList<HtmlElement> Roots;
         public LinkedList<HtmlElement> VoidElements;
         private LinkedList<HtmlElement> _treeElements;
 
         public HtmlTreeBuilder(string html)
         {
             _html = html;
+            Roots = new LinkedList<HtmlElement>();
             VoidElements = new LinkedList<HtmlElement>();
             _treeElements = new LinkedList<HtmlElement>();
 
@@ -87,9 +88,12 @@ namespace MyCourseWork_02
                 _treeElements.RemoveAt(_treeElements.Count - 1);
 
             }
-
-            else if (Equals(child.Value.TagName, tag) && _treeElements.Count == 1)
-                return;
+            else if (Equals(child.Value.TagName, tag) 
+                && _treeElements.Count == 1)
+            {
+                Roots.Add(child.Value);
+                _treeElements.RemoveAt(0);
+            }
 
             else throw new Exception("Incorrect end tag of element!");
         }
@@ -141,9 +145,6 @@ namespace MyCourseWork_02
                 else if (element != null) 
                     content += _html[i];
             }
-
-            if (_treeElements.Count > 0) 
-                Root = _treeElements.First.Value;
         }
     }
 }

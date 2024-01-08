@@ -4,12 +4,12 @@ namespace MyCourseWork_02
     public class PathFinder
     {
         private LinkedList<PathTag> _pathTags;
-        public LinkedList<HtmlElement> ElementsFound;
+        public LinkedList<HtmlElement> Elements;
 
         public PathFinder(string path, HtmlElement element) 
         {
             _pathTags = new LinkedList<PathTag>();
-            ElementsFound = new LinkedList<HtmlElement>();
+            Elements = new LinkedList<HtmlElement>();
 
             GetTagsFromPath(path);
             FindPathElements(element, 0);
@@ -116,7 +116,7 @@ namespace MyCourseWork_02
             return true;
         }
 
-        private void CheckForSearchedElement(HtmlElement element)
+        private void SearchForCurrentElement(HtmlElement element)
         {
             if (_pathTags.Last.Value.Name == "*" && _pathTags.Last.Previous != null)
             {
@@ -135,7 +135,7 @@ namespace MyCourseWork_02
             else if (element.TagName == _pathTags.Last.Value.Name)
             {
                 if (IsCorrectPath(element))
-                    ElementsFound.Add(element);
+                    Elements.Add(element);
             }
         }
 
@@ -143,7 +143,7 @@ namespace MyCourseWork_02
         {
             if (element == null || _pathTags.Count == 0) return;
 
-            CheckForSearchedElement(element);
+            SearchForCurrentElement(element);
 
             if (element.Children.Count > 0)
             {
@@ -195,7 +195,7 @@ namespace MyCourseWork_02
                     }
                     else
                     {
-                        ElementsFound.Add(child.Value);
+                        Elements.Add(child.Value);
                     }
 
                     child = child.Next;
@@ -203,7 +203,7 @@ namespace MyCourseWork_02
             }
             else
             {
-                ElementsFound.Add(element);
+                Elements.Add(element);
             }
         }
 

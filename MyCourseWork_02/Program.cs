@@ -10,14 +10,14 @@ namespace MyCourseWork_02
 
             try
             {
-                HtmlElement htmlElement = null;
                 var path = Console.ReadLine();
                 var file = System.IO.File.ReadAllText(path);
                 var htmlTree = new HtmlTreeBuilder(file);
-                htmlElement = htmlTree.Root;
 
-                if (htmlElement == null)
+                if (htmlTree.Roots.Count == 0 || htmlTree.Roots.Count > 1)
                     throw new Exception("Invalid HTML document!");
+
+                var htmlElement = htmlTree.Roots.First.Value;
 
                 while (true)
                 {
@@ -29,7 +29,6 @@ namespace MyCourseWork_02
 
                     Command command = new Command(newCommand, htmlElement);
                     command.Execute();
-                    Console.WriteLine();
                 }
             }
             catch (Exception e)

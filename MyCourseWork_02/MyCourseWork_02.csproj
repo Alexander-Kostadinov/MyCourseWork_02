@@ -44,15 +44,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
-    <Compile Include="CommandExecuter.cs" />
+    <Compile Include="Copier.cs" />
     <Compile Include="HtmlElement.cs" />
     <Compile Include="PathFinder.cs" />
     <Compile Include="PathTag.cs" />
     <Compile Include="HtmlTreeBuilder.cs" />
     <Compile Include="LinkedList.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="Printer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Setter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

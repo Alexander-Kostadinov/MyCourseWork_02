@@ -16,6 +16,8 @@ namespace MyCourseWork_02
             {
                 RemoveAt(node.Index);
             }
+
+            Last = null;
         }
 
         public void Add(T value)
