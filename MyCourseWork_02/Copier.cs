@@ -105,6 +105,7 @@ namespace MyCourseWork_02
                     att2 = att2.Next;
                 }
             }
+            else return false;
 
             return true;
         }
