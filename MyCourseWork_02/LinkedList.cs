@@ -4,9 +4,9 @@ namespace MyCourseWork_02
 {
     public class LinkedList<T>
     {
-        public Node<T> First;
-        public Node<T> Last;
         public int Count;
+        public Node<T> Last;
+        public Node<T> First;
 
         public void Clear()
         {

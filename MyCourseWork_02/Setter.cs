@@ -75,6 +75,8 @@ namespace MyCourseWork_02
                 }
                 element = element.Next;
             }
+
+            treeBuilder.Elements.Clear();
         }
 
         private bool Contains(string value, char symbol)

@@ -26,11 +26,13 @@ namespace MyCourseWork_02
                     var path = new PathFinder(_path, _elementNode);
                     var printer = new Printer(path.Elements);
                     printer.Print();
+                    path.Elements.Clear();
                     break;
                 case "SET":
                     path = new PathFinder(_path, _elementNode);
                     var setter = new Setter(path.Elements, _content);
                     setter.Set();
+                    path.Elements.Clear();
                     break;
                 case "COPY":
                     if (_path != _content)
@@ -39,10 +41,11 @@ namespace MyCourseWork_02
                         var secondPath = new PathFinder(_content, _elementNode);
                         var copier = new Copier(path.Elements, secondPath.Elements);
                         copier.Copy();
+                        path.Elements.Clear();
+                        secondPath.Elements.Clear();
                     }
                     break;
                 case "SAVE":
-
                     var elements = new LinkedList<string>();
                     Save(_elementNode.Value, elements, 0);
                     var html = string.Empty;
@@ -57,63 +60,11 @@ namespace MyCourseWork_02
 
                     string file = Path.ChangeExtension(_file, ".html");
                     File.WriteAllText(file, html);
+                    elements.Clear();
                     break;
                 default:
                     break;
             }
-        }
-
-        private void Save(HtmlElement element, LinkedList<string> html, int spaceCount)
-        {
-            if (element == null) return;
-
-            if (element.Children.Count == 0)
-            {
-                if (element.IsVoid)
-                {
-                     html.Add(new string(' ', spaceCount) + '<' +
-                        element.TagName + ' ' + PrintAttributes(element) + "/>" + '\n');
-                }
-                else
-                {
-                    html.Add(new string(' ', spaceCount) + '<' + element.TagName
-                        + PrintAttributes(element) + '>' + element.Content
-                        + "</" + element.TagName + '>' + '\n');
-                }
-            }
-            else if (element.Children.Count > 0)
-            {
-                html.Add(new string(' ', spaceCount) + '<' + element.TagName +
-                PrintAttributes(element) + '>' + element.Content + '\n');
-
-                spaceCount++;
-                var child = element.Children.First;
-
-                for (int i = 0; i < element.Children.Count; i++)
-                {
-                    Save(child.Value, html, spaceCount);
-                    child = child.Next;
-                }
-
-                spaceCount--;
-                html.Add(new string(' ', spaceCount) + "</" + element.TagName + '>' + '\n');
-            }
-        }
-
-        private string PrintAttributes(HtmlElement element)
-        {
-            if (element == null) return null;
-
-            var result = string.Empty;
-            var attribute = element.Attributes.First;
-
-            for (int i = 0; i < element.Attributes.Count; i++)
-            {
-                result += ' ' + attribute.Value;
-                attribute = attribute.Next;
-            }
-
-            return result;
         }
 
         private void GetCommandElements(string command)
@@ -156,6 +107,22 @@ namespace MyCourseWork_02
             }
         }
 
+        private string SaveAttributes(HtmlElement element)
+        {
+            if (element == null) return null;
+
+            var result = string.Empty;
+            var attribute = element.Attributes.First;
+
+            for (int i = 0; i < element.Attributes.Count; i++)
+            {
+                result += ' ' + attribute.Value;
+                attribute = attribute.Next;
+            }
+
+            return result;
+        }
+
         private string Substring(string text, int index, int length)
         {
             if (text == null) return null;
@@ -174,6 +141,43 @@ namespace MyCourseWork_02
             }
 
             return new string(result);
+        }
+
+        private void Save(HtmlElement element, LinkedList<string> html, int spaceCount)
+        {
+            if (element == null) return;
+
+            if (element.Children.Count == 0)
+            {
+                if (element.IsVoid)
+                {
+                    html.Add(new string(' ', spaceCount) + '<' +
+                       element.TagName + ' ' + SaveAttributes(element) + "/>" + '\n');
+                }
+                else
+                {
+                    html.Add(new string(' ', spaceCount) + '<' + element.TagName
+                        + SaveAttributes(element) + '>' + element.Content
+                        + "</" + element.TagName + '>' + '\n');
+                }
+            }
+            else if (element.Children.Count > 0)
+            {
+                html.Add(new string(' ', spaceCount) + '<' + element.TagName +
+                SaveAttributes(element) + '>' + element.Content + '\n');
+
+                spaceCount++;
+                var child = element.Children.First;
+
+                for (int i = 0; i < element.Children.Count; i++)
+                {
+                    Save(child.Value, html, spaceCount);
+                    child = child.Next;
+                }
+
+                spaceCount--;
+                html.Add(new string(' ', spaceCount) + "</" + element.TagName + '>' + '\n');
+            }
         }
     }
 }
