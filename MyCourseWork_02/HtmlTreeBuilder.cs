@@ -5,15 +5,13 @@ namespace MyCourseWork_02
     public class HtmlTreeBuilder
     {
         private string _html;
-        public LinkedList<HtmlElement> Roots;
-        public LinkedList<HtmlElement> VoidElements;
+        public LinkedList<HtmlElement> Elements;
         private LinkedList<HtmlElement> _treeElements;
 
         public HtmlTreeBuilder(string html)
         {
             _html = html;
-            Roots = new LinkedList<HtmlElement>();
-            VoidElements = new LinkedList<HtmlElement>();
+            Elements = new LinkedList<HtmlElement>();
             _treeElements = new LinkedList<HtmlElement>();
 
             BuildHtmlTreeStructure();
@@ -21,7 +19,7 @@ namespace MyCourseWork_02
 
         private char ToLowerLetter(char ch)
         {
-            if (ch >= 65 && ch <= 90) 
+            if (ch >= 65 && ch <= 90)
                 return (char)(ch + 32);
 
             return ch;
@@ -58,20 +56,41 @@ namespace MyCourseWork_02
 
             if (tag[tag.Length - 1] == '/')
             {
-                var element = new HtmlElement(tag.Substring(0, length - 1));
+                var element = new HtmlElement(Substring(tag, 0, length - 1));
 
                 if (IsVoidHtmlTag(element.TagName) && _treeElements.Count > 0)
                 {
                     element.IsVoid = true;
+                    element.Parent = _treeElements.Last.Value;
                     _treeElements.Last.Value.Children.Add(element);
                 }
                 else if (IsVoidHtmlTag(element.TagName))
                 {
                     element.IsVoid = true;
-                    VoidElements.Add(element);
+                    Elements.Add(element);
                 }
                 else throw new Exception("Incorrect closed tag!");
             }
+        }
+
+        private string Substring(string text, int index, int length)
+        {
+            if (text == null) return null;
+
+            int counter = 0;
+            var result = new char[length];
+
+            for (int i = index; i < text.Length; i++)
+            {
+                if (counter >= length)
+                {
+                    break;
+                }
+
+                result[counter++] = text[i];
+            }
+
+            return new string(result);
         }
 
         private void AppendChild(Node<HtmlElement> child, string tag)
@@ -88,13 +107,12 @@ namespace MyCourseWork_02
                 _treeElements.RemoveAt(_treeElements.Count - 1);
 
             }
-            else if (Equals(child.Value.TagName, tag) 
+            else if (Equals(child.Value.TagName, tag)
                 && _treeElements.Count == 1)
             {
-                Roots.Add(child.Value);
+                Elements.Add(child.Value);
                 _treeElements.RemoveAt(0);
             }
-
             else throw new Exception("Incorrect end tag of element!");
         }
 
@@ -119,11 +137,11 @@ namespace MyCourseWork_02
                     {
                         if (_html[j] == '>' && quotsCount % 2 == 0)
                         {
-                            var tag = _html.Substring(i + 1, length); i = j;
+                            var tag = Substring(_html, i + 1, length); i = j;
 
                             if (tag[0] == '/')
                             {
-                                AppendChild(_treeElements.Last, tag.Substring(1));
+                                AppendChild(_treeElements.Last, Substring(tag, 1, tag.Length - 1));
                                 element = null;
                             }
                             else if (tag[tag.Length - 1] == '/')
@@ -142,7 +160,7 @@ namespace MyCourseWork_02
                         length++;
                     }
                 }
-                else if (element != null) 
+                else if (element != null)
                     content += _html[i];
             }
         }

@@ -86,17 +86,20 @@ namespace MyCourseWork_02
                     if (quotsCount % 2 == 0)
                     {
                         ValidateAttribute(attribute);
-                        Attributes.Add(attribute);
+                        Attributes.Add(SetSingleQuots(attribute));
                         attribute = "";
                     } 
                     continue;
                 }
                 else if (isTagName)
                 {
-                    TagName += tag[i]; continue;
+                    TagName += tag[i]; 
+                    continue;
                 }
+
                 attribute += tag[i];
             }
+
             ValidateTagName();
 
             if (attribute != "")
@@ -152,9 +155,33 @@ namespace MyCourseWork_02
             if (attributeValue != "")
             {
                 if ((attributeValue[0] != '"' && attributeValue[0] != '\'') ||
-                (attributeValue[0] != attributeValue[attributeValue.Length - 1]) || Contains(attributeValue, '<'))
+                    (attributeValue[0] != attributeValue[attributeValue.Length - 1]) ||
+                    Contains(attributeValue, '<'))
+                {
                     throw new Exception("Error detected! Invalid attribute value!");
+                }
             }
+        }
+
+        private string SetSingleQuots(string attribute)
+        {
+            if (attribute == null) return null; 
+
+            var result = new char[attribute.Length];
+
+            for (int i = 0; i < attribute.Length; i++)
+            {
+                if (attribute[i] == '"')
+                {
+                    result[i] = '\'';
+                }
+                else
+                {
+                    result[i] = attribute[i];
+                }
+            }
+
+            return new string(result);
         }
     }
 }

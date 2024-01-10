@@ -34,8 +34,12 @@ namespace MyCourseWork_02
 
                 for (int i = 0; i < _elements.Count; i++)
                 {
-                    element.Value.Children.Clear();
-                    element.Value.Content = _content;
+                    if (!element.Value.IsVoid)
+                    {
+                        element.Value.Children.Clear();
+                        element.Value.Content = _content;
+                    }
+
                     element = element.Next;
                 }
             }
@@ -48,32 +52,26 @@ namespace MyCourseWork_02
 
             for (int i = 0; i < _elements.Count; i++)
             {
+                if (element.Value.IsVoid)
+                {
+                    element = element.Next;
+                    continue;
+                }
+
                 element.Value.Children.Clear();
                 element.Value.Content = string.Empty;
 
-                if (treeBuilder.Roots.Count > 0)
+                if (treeBuilder.Elements.Count > 0)
                 {
-                    var child = treeBuilder.Roots.First;
+                    var child = treeBuilder.Elements.First;
 
-                    for (int j = 0; j < treeBuilder.Roots.Count; j++)
+                    for (int j = 0; j < treeBuilder.Elements.Count; j++)
                     {
                         child.Value.Parent = element.Value;
                         element.Value.Children.Add(child.Value);
                         child = child.Next;
                     }
-                    treeBuilder.Roots.Clear();
-                }
-                if (treeBuilder.VoidElements.Count > 0)
-                {
-                    var voidElement = treeBuilder.VoidElements.First;
-
-                    for (int j = 0; j < treeBuilder.VoidElements.Count; j++)
-                    {
-                        voidElement.Value.Parent = element.Value;
-                        element.Value.Children.Add(voidElement.Value);
-                        voidElement = voidElement.Next;
-                    }
-                    treeBuilder.VoidElements.Clear();
+                    treeBuilder.Elements.Clear();
                 }
                 element = element.Next;
             }

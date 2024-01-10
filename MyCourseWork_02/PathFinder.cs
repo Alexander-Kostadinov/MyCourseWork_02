@@ -1,23 +1,82 @@
-﻿
+﻿using System;
+
 namespace MyCourseWork_02
 {
     public class PathFinder
     {
         private LinkedList<PathTag> _pathTags;
+        private Node<HtmlElement> _elementNode;
         public LinkedList<HtmlElement> Elements;
 
-        public PathFinder(string path, HtmlElement element) 
+        public PathFinder(string path, Node<HtmlElement> element) 
         {
+            if (path == null || element == null)
+                throw new ArgumentNullException();
+
+            _elementNode = element;
             _pathTags = new LinkedList<PathTag>();
             Elements = new LinkedList<HtmlElement>();
 
             GetTagsFromPath(path);
-            FindPathElements(element, 0);
+
+            if (_pathTags.Count > 0)
+                Find(_elementNode, _pathTags.First, 0);
+        }
+
+        private PathTag GetTag(string tag)
+        {
+            if (tag == null) return null;
+
+            var hasAttribute = false;
+            var value = string.Empty;
+            var pathTag = new PathTag();
+
+            for (int i = 0; i < tag.Length; i++)
+            {
+                if (tag[i] == '[')
+                {
+                    for (int j = i + 1; j < tag.Length; j++)
+                    {
+                        if (tag[j] == ']')
+                        {
+                            i = j;
+                            break;
+                        }
+                        else if (tag[j] == '@')
+                        {
+                            hasAttribute = true;
+                        }
+                        value += tag[j];
+                    }
+                }
+                if (hasAttribute)
+                {
+                    pathTag.Attribute = value.Substring(1);
+                    value = string.Empty;
+                }
+                else if (value != string.Empty)
+                {
+                    int number;
+                    bool success = int.TryParse(value, out number);
+
+                    if (success)
+                    {
+                        pathTag.TagIndex = number;
+                        value = string.Empty;
+                    }
+                    else
+                    {
+                        throw new Exception("Invalid index or attribute of tag in the path!");
+                    }
+                }
+                else pathTag.Name += tag[i];
+            }
+            return pathTag;
         }
 
         private void GetTagsFromPath(string path)
         {
-            if (path == null || path.Length < 2)
+            if (path.Length < 2)
                 return;
 
             else if (path[0] != '/' || path[1] != '/')
@@ -26,160 +85,39 @@ namespace MyCourseWork_02
             else if (path == "//")
             {
                 var root = new PathTag();
-                root.Name = "html";
-                _pathTags.Add(root);
-                return;
+                root.Name = _elementNode.Value.TagName;
+                _pathTags.Add(root); return;
             }
 
             var tag = "";
+            var quotsCount = 0;
 
             for (int i = 0; i < path.Length; i++)
             {
-                if (path[i] == '/')
+                if (path[i] == '/' && i < path.Length - 1 && quotsCount % 2 == 0)
                 {
-                    if (tag != "")
+                    if (path[i + 1] == '/' && i > 1)
+                        throw new Exception("Incorrect path format!");
+
+                    if (tag != "" )
                     {
-                        _pathTags.Add(GetTagElements(tag));
+                        _pathTags.Add(GetTag(tag));
                         tag = "";
                     }
                     continue;
                 }
+                else if (path[i] == '\'') quotsCount++;
+
                 tag += path[i];
             }
 
             if (tag != "")
             {
-                _pathTags.Add(GetTagElements(tag));
+                _pathTags.Add(GetTag(tag));
             }
         }
 
-        private PathTag GetTagElements(string tag)
-        {
-            var index = "";
-            var isIndex = false;
-            var isAttribute = false;
-            PathTag htmlTag = new PathTag();
-
-            for (int i = 0; i < tag.Length - 1; i++)
-            {
-                if (tag[i] == ']')
-                    break;
-
-                else if (tag[i] == '[' && tag[i + 1] != '@')
-                    isIndex = true;
-
-                else if (tag[i] == '[' && tag[i + 1] == '@')
-                {
-                    i++;
-                    isAttribute = true;
-                }
-
-                else if (isAttribute)
-                    htmlTag.Attribute += tag[i];
-
-                else if (isIndex && tag[i] >= 48 && tag[i] <= 57)
-                    index += tag[i];
-
-                else
-                    htmlTag.Name += tag[i];
-            }
-
-            if (index != "")
-            {
-                htmlTag.TagIndex = int.Parse(index);
-            }
-            else if (isAttribute == isIndex)
-            {
-                htmlTag.Name += tag[tag.Length - 1];
-            }
-
-            return htmlTag;
-        }
-
-        private bool IsCorrectPath(HtmlElement element)
-        {
-            if (element == null) return false;
-
-            var tag = _pathTags.Last;
-
-            for (int i = 0; i < _pathTags.Count; i++)
-            {
-                if (element == null || tag.Value == null)
-                    return false;
-                else if (element.TagName != tag.Value.Name)
-                    return false;
-
-                tag = tag.Previous;
-                element = element.Parent;
-            }
-
-            return true;
-        }
-
-        private void SearchForCurrentElement(HtmlElement element)
-        {
-            if (_pathTags.Last.Value.Name == "*" && _pathTags.Last.Previous != null)
-            {
-                if (element.TagName == _pathTags.Last.Previous.Value.Name)
-                {
-                    _pathTags.RemoveAt(_pathTags.Count - 1);
-
-                    if (IsCorrectPath(element))
-                        FindTagElements(element, _pathTags.Last.Value.Name);
-
-                    var tag = new PathTag();
-                    tag.Name = "*";
-                    _pathTags.Add(tag);
-                }
-            }
-            else if (element.TagName == _pathTags.Last.Value.Name)
-            {
-                if (IsCorrectPath(element))
-                    Elements.Add(element);
-            }
-        }
-
-        private void FindPathElements(HtmlElement element, int level)
-        {
-            if (element == null || _pathTags.Count == 0) return;
-
-            SearchForCurrentElement(element);
-
-            if (element.Children.Count > 0)
-            {
-                level++;
-                var tag = _pathTags.First;
-                var child = element.Children.First;
-
-                for (int j = 0; j < _pathTags.Count; j++)
-                {
-                    if (tag.Index == level) break;
-                    tag = tag.Next;
-                }
-
-                if (level > _pathTags.Count || tag == null) return;
-
-                for (int i = 0; i < element.Children.Count; i++)
-                {
-                    if (tag.Value.TagIndex != 0 && child.Index + 1 != tag.Value.TagIndex)
-                    {
-                        child = child.Next;
-                        continue;
-                    }
-                    else if (tag.Value.Attribute != null &&
-                        !ContainsAttribute(child.Value.Attributes, tag.Value.Attribute))
-                    {
-                        child = child.Next;
-                        continue;
-                    }
-
-                    FindPathElements(child.Value, level);
-                    child = child.Next;
-                }
-            }
-        }
-
-        private void FindTagElements(HtmlElement element, string tag)
+        private void SearchTagElements(HtmlElement element, string tag)
         {
             if (element == null || tag == null) return;
 
@@ -191,7 +129,7 @@ namespace MyCourseWork_02
                 {
                     if (child.Value.TagName == tag)
                     {
-                        FindTagElements(child.Value, tag);
+                        SearchTagElements(child.Value, tag);
                     }
                     else
                     {
@@ -220,6 +158,47 @@ namespace MyCourseWork_02
             }
 
             return false;
+        }
+
+        private void Find(Node<HtmlElement> element ,Node<PathTag> tag, int level)
+        {
+            if (tag == null || element == null)
+                return;
+            else if (level != tag.Index) 
+                return;
+
+            if (tag.Value.Name == "*" && tag.Index >= 1)
+            {
+                SearchTagElements(element.Value, tag.Previous.Value.Name);
+            }
+            else if (element.Value.TagName == tag.Value.Name)
+            {
+                if (tag.Value.Attribute != null && 
+                    !ContainsAttribute(element.Value.Attributes, tag.Value.Attribute))
+                {
+                    return;
+                }
+                if (tag.Value.TagIndex != 0 && element.Index + 1 != tag.Value.TagIndex)
+                {
+                    return;
+                }
+
+                if (tag == _pathTags.Last)
+                {
+                    Elements.Add(element.Value);
+                }
+                else if (tag.Next != null)
+                {
+                    level++;
+                    var child = element.Value.Children.First;
+
+                    for (int i = 0; i < element.Value.Children.Count; i++)
+                    {
+                        Find(child, tag.Next, level);
+                        child = child.Next;
+                    }
+                }
+            }
         }
     }
 }

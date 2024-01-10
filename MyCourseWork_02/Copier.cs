@@ -30,7 +30,8 @@ namespace MyCourseWork_02
 
             for (int i = 0; i < _secondElements.Count; i++)
             {
-                if (IsSamePath(element.Value, secondElement.Value))
+                if (secondElement.Value.IsVoid ||
+                    IsSamePath(element.Value, secondElement.Value))
                 {
                     secondElement = secondElement.Next;
                     continue;
@@ -64,7 +65,8 @@ namespace MyCourseWork_02
                     secondElement.Value.Children.Clear();
                     secondElement.Value.Content = element.Value.Content;
                 }
-                secondElement = secondElement.Next; copy.Children.Clear();
+                copy.Children.Clear();
+                secondElement = secondElement.Next; 
             }
         }
 
