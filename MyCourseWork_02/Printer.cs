@@ -69,7 +69,7 @@ namespace MyCourseWork_02
                 Console.WriteLine(new string(' ', spaceCount) + '<' + element.TagName +
                     PrintAttributes(element) + '>' + element.Content);
 
-                spaceCount++;
+                spaceCount += 2;
                 var child = element.Children.First;
 
                 for (int i = 0; i < element.Children.Count; i++)

@@ -166,7 +166,7 @@ namespace MyCourseWork_02
                 html.Add(new string(' ', spaceCount) + '<' + element.TagName +
                 SaveAttributes(element) + '>' + element.Content + '\n');
 
-                spaceCount++;
+                spaceCount += 2;
                 var child = element.Children.First;
 
                 for (int i = 0; i < element.Children.Count; i++)
