@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
-using System.Windows.Forms;
+using System.Drawing;
 using MyCourseWork_02;
+using System.Windows.Forms;
 using HtmlElement = MyCourseWork_02.HtmlElement;
 
 namespace HtmlGraphic
@@ -11,58 +11,220 @@ namespace HtmlGraphic
     {
         Node<HtmlElement> Element;
         LinkedList<HtmlElement> Elements;
+        LinkedList<LinkLabel> LinkLabels;
 
         public Form1()
         {
+            AutoScroll = true;
             InitializeComponent();
             Elements = new LinkedList<HtmlElement>();
+            LinkLabels = new LinkedList<LinkLabel>();
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
+        private void PaintElements()
         {
-            Pen pen = new Pen(Color.Black, 1);
-            e.Graphics.DrawRectangle(pen, 20, menuStrip1.Location.Y + 
-                menuStrip1.Height + 10, (Elements.Count + 1) * 45, (Elements.Count + 1) * 45);
+            if (Elements.Count == 0)
+            {
+                return;
+            }
 
+            var x = 20;
+            var y = 30;
             var element = Elements.First;
 
             for (int i = 0; i < Elements.Count; i++)
             {
                 if (element.Value.TagName == "img")
                 {
-                    var src = element.Value.Attributes.First.Value;
-                    bool isImgName = false;
-                    var imgName = "";
-
-                    for (int j = 0; j < src.Length; j++)
-                    {
-                        if (src[j] == '\'')
-                        {
-                            isImgName = true;
-                        }
-                        else if (isImgName)
-                        {
-                            imgName += src[j];
-                        }
-                    }
-
-                    Image image = Image.FromFile(imgName);
-                    e.Graphics.DrawImage(image, 150, (i + 1) * 30);
+                    PictureBox picture = new PictureBox();
+                    PaintBitmap(element.Value, picture);
+                    picture.Location = new Point(x, y);
+                    y += picture.Size.Height + 10;
+                    Controls.Add(picture);
+                }
+                else if (element.Value.TagName == "table")
+                {
+                    TableLayoutPanel table = new TableLayoutPanel();
+                    PaintTable(element.Value, table);
+                    table.Location = new Point(x, y);
+                    y += table.Height + 10;
+                    Controls.Add(table);
                 }
                 else if (element.Value.TagName == "a")
                 {
-                    Font linkFont = new Font("Arial", 18, FontStyle.Underline);
-                    Brush linkBrush = new SolidBrush(Color.Blue);
-                    e.Graphics.DrawString(element.Value.Content, linkFont, linkBrush, 20, (i + 1) * 50);
+                    LinkLabel linkLabel = new LinkLabel();
+                    LinkLabel.Link link = new LinkLabel.Link();
+                    link.LinkData = GetLinkUrl(element.Value);
+                    linkLabel.Links.Add(link);
+                    linkLabel.AutoSize = true;
+                    linkLabel.Font = new Font("Arial",
+                        12, FontStyle.Underline);
+                    linkLabel.ForeColor = Color.Blue;
+                    linkLabel.Location = new Point(x, y);
+                    linkLabel.Text = element.Value.Content;
+                    linkLabel.MouseClick += Label_MouseClick;
+                    LinkLabels.Add(linkLabel);
+                    Controls.Add(linkLabel);
+                    y += linkLabel.Height + 10;
                 }
                 else
                 {
-                    Font textFont = new Font("Arial", 20);
-                    Brush textBrush = new SolidBrush(Color.Black);
-                    e.Graphics.DrawString(element.Value.Content, textFont, textBrush, 20, (i + 1) * 50);
+                    Label label = new Label();
+                    label.Location = new Point(x, y);
+                    label.Font = new Font("Arial", 14);
+                    label.Text += element.Value.Content;
+                    y += label.Height + 10;
+                    label.AutoSize = true;
+                    Controls.Add(label);
                 }
 
                 element = element.Next;
+            }
+        }
+
+        private void Label_MouseClick(object sender, MouseEventArgs e)
+        {
+            var link = LinkLabels.First;
+
+            for (int i = 0; i < LinkLabels.Count; i++)
+            {
+                if (link.Value == sender)
+                {
+                    break;
+                }
+
+                link = link.Next;
+            }
+
+            try
+            {
+                var url = link.Value.Links[0];
+
+                if (url != null)
+                {
+                    System.Diagnostics.Process.Start(url.LinkData.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private string GetLinkUrl(HtmlElement element)
+        {
+            var link = "";
+            var attrName = "";
+            bool isAttrValue = false;
+            var attribute = element.Attributes.First;
+
+            for (int i = 0; i < element.Attributes.Count; i++)
+            {
+                for (int j = 0; j < attribute.Value.Length - 1; j++)
+                {
+                    if (attribute.Value[j] == '=' && attribute.Value[j + 1] == '\'')
+                    {
+                        if (attrName != "href")
+                        {
+                            break;
+                        }
+
+                        isAttrValue = true; j++;
+                    }
+                    else if (isAttrValue)
+                    {
+                        link += attribute.Value[j];
+                    }
+                    else attrName += attribute.Value[j];
+                }
+
+                attribute = attribute.Next;
+            }
+
+            return link;
+        }
+
+        private void PaintTable(HtmlElement element, TableLayoutPanel table)
+        {
+            var y = 0;
+            table.Width = 0;
+            table.Height = 0;
+            var tableChild = element.Children.First;
+
+            for (int i = 0; i < element.Children.Count; i++)
+            {
+                if (tableChild.Value.TagName == "tr")
+                {
+                    TableLayoutPanel panel = new TableLayoutPanel();
+                    var rowChild = tableChild.Value.Children.First;
+                    panel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+                    panel.RowCount = 1;
+                    table.RowCount++;
+
+                    for (int j = 0; j < tableChild.Value.Children.Count; j++)
+                    {
+                        if (rowChild.Value.TagName == "td")
+                        {
+                            panel.ColumnCount++;
+                            Label label = new Label();
+                            label.Font = new Font("Arial", 14);
+                            label.Text = rowChild.Value.Content;
+                            label.AutoSize = true;
+                            panel.Controls.Add(label, j, 0);
+                        }
+
+                        rowChild = rowChild.Next;
+                    }
+
+                    panel.AutoSize = true;
+                    table.Controls.Add(panel, 0, i);
+
+                    if (i == 0)
+                    {
+                        y = panel.Bounds.Y;
+                    }
+                    if (table.Width < panel.Width)
+                    {
+                        table.Width = panel.Width + (2 * panel.Bounds.X);
+                    }
+
+                    table.Height = 2 * panel.Bounds.Y - y;
+                }
+
+                tableChild = tableChild.Next;
+            }
+
+            table.CellBorderStyle = TableLayoutPanelCellBorderStyle.None;
+        }
+
+        private void PaintBitmap(HtmlElement element, PictureBox picture)
+        {
+            var attrName = "";
+            var fileName = "";
+            bool isFileName = false;
+            var source = element.Attributes.First;
+
+            for (int j = 0; j < source.Value.Length - 1; j++)
+            {
+                if (source.Value[j] == '=' && source.Value[j + 1] == '\'')
+                {
+                    isFileName = true; j++;
+                }
+                else if (isFileName && attrName == "src")
+                {
+                    fileName += source.Value[j];
+                }
+                else attrName += source.Value[j];
+            }
+
+            var path = Path.GetDirectoryName(openFileDialog1.FileName);
+
+            if (File.Exists(path + '\\' + fileName))
+            {
+                Bitmap bitmap = new Bitmap(path + '\\' + fileName);;
+                picture.Height = bitmap.Height;
+                picture.Width = bitmap.Width;
+                picture.Image = bitmap;
             }
         }
 
@@ -70,9 +232,14 @@ namespace HtmlGraphic
         {
             if (element == null) return;
 
-            if (element.Children.Count == 0)
+            if (element.TagName == "table")
             {
-                if (element.Content != null || element.Attributes.Count > 0)
+                Elements.Add(element);
+            }
+            else if (element.Children.Count == 0)
+            {
+                if (element.Content != null ||
+                    element.TagName == "img" || element.TagName == "a")
                 {
                     Elements.Add(element);
                 }
@@ -89,34 +256,18 @@ namespace HtmlGraphic
             }
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var command = new Command(string.Empty, string.Empty, Element);
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                var html = string.Empty;
-                LinkedList<string> elements = new LinkedList<string>();
-                command.Save(Element.Value, elements, 0);
-
-                var element = elements.First;
-
-                for (int i = 0; i < elements.Count; i++)
-                {
-                    html += element.Value;
-                    element = element.Next;
-                }
-
-                saveFileDialog1.AddExtension = true;
-                File.WriteAllText(saveFileDialog1.FileName, html);
-            }
-        }
-
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (Elements.Count > 0)
+            {
+                Exception ex = new Exception("There is an already open file! " +
+                    "Please, close it befoere open a new file!");
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
             var html = string.Empty;
-            Graphics graphics = CreateGraphics();
-            graphics.Clear(Form1.DefaultBackColor);
+            HtmlTreeBuilder treeBuilder = null;
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -124,24 +275,33 @@ namespace HtmlGraphic
                 html = reader.ReadToEnd();
             }
 
-            var treeBuilder = new HtmlTreeBuilder(html);
-            Element = treeBuilder.Elements.First;
-            GetElementsContent(treeBuilder.Elements.First.Value);
+            if (html != null && html != "")
+            {
+                treeBuilder = new HtmlTreeBuilder(html);
+                Element = treeBuilder.Elements.First;
 
-            var g = new PaintEventArgs(CreateGraphics(), new Rectangle());
-            base.OnPaint(g);
+                if (Element.Value.TagName != "html")
+                {
+                    return;
+                }
 
-            if (Elements == null) return;
+                GetElementsContent(treeBuilder.Elements.First.Value);
+            }
 
-            Form1_Paint(sender: sender, g);
+            if (Elements == null) 
+                return;
+
+            PaintElements();
+            openFileDialog1.Dispose();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var menu = menuStrip1;
             Elements.Clear();
-            openFileDialog1.Dispose();
-            Graphics graphics = CreateGraphics();
-            graphics.Clear(Form1.DefaultBackColor);
+            Controls.Clear();
+            Controls.Add(menu);
+            Refresh();
         }
     }
 }

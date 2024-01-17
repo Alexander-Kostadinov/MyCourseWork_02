@@ -143,7 +143,7 @@ namespace MyCourseWork_02
             return new string(result);
         }
 
-        public void Save(HtmlElement element, LinkedList<string> html, int spaceCount)
+        private void Save(HtmlElement element, LinkedList<string> html, int spaceCount)
         {
             if (element == null) return;
 
